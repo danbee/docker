@@ -5,7 +5,10 @@ RUN apt-get update \
 
 RUN apt-get install -yq \
       libpq-dev \
-      jq
+      jq \
+      bzip2 \
+      libgconf-2-4 \
+      unzip
 
 # Install NodeJS
 RUN curl -sL https://deb.nodesource.com/setup_10.x | bash - \
@@ -18,9 +21,7 @@ RUN curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | apt-key add - \
     && apt-get install -yq yarn
 
 # Install Java 8
-RUN apt-get update \
-    && apt-get install -yq openjdk-8-jre openjdk-8-jre-headless openjdk-8-jdk openjdk-8-jdk-headless \
-    && apt-get install -yq bzip2 libgconf-2-4
+RUN apt-get install -yq openjdk-8-jre openjdk-8-jre-headless openjdk-8-jdk openjdk-8-jdk-headless
 
 # Install Firefox
 RUN FIREFOX_URL="https://download.mozilla.org/?product=firefox-latest-ssl&os=linux64&lang=en-US" \
@@ -44,9 +45,9 @@ RUN export GECKODRIVER_LATEST_RELEASE_URL=$(curl https://api.github.com/repos/mo
 
 # Install Chrome
 RUN curl --silent --show-error --location --fail --retry 3 --output /tmp/google-chrome-stable_current_amd64.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb \
-      && (sudo dpkg -i /tmp/google-chrome-stable_current_amd64.deb || sudo apt-get -fy install)  \
+      && (dpkg -i /tmp/google-chrome-stable_current_amd64.deb || apt-get -fy install)  \
       && rm -rf /tmp/google-chrome-stable_current_amd64.deb \
-      && sudo sed -i 's|HERE/chrome"|HERE/chrome" --disable-setuid-sandbox --no-sandbox|g' \
+      && sed -i 's|HERE/chrome"|HERE/chrome" --disable-setuid-sandbox --no-sandbox|g' \
            "/opt/google/chrome/google-chrome" \
       && google-chrome --version
 
@@ -55,6 +56,6 @@ RUN export CHROMEDRIVER_RELEASE=$(curl --location --fail --retry 3 http://chrome
       && cd /tmp \
       && unzip chromedriver_linux64.zip \
       && rm -rf chromedriver_linux64.zip \
-      && sudo mv chromedriver /usr/local/bin/chromedriver \
-      && sudo chmod +x /usr/local/bin/chromedriver \
+      && mv chromedriver /usr/local/bin/chromedriver \
+      && chmod +x /usr/local/bin/chromedriver \
       && chromedriver --version
